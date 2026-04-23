@@ -151,7 +151,7 @@
       <a href="#" class="btn btn-outline-danger btn-sm w-100 rounded-pill mb-2 py-2 fw-medium d-flex justify-content-center align-items-center">
         <i class="bi bi-headset me-1"></i> ติดต่อผู้ดูแลระบบ
       </a>
-      <a href="#" onclick="window.logoutApp()" class="btn btn-theme-super btn-sm w-100 rounded-pill py-2 fw-medium d-flex justify-content-center align-items-center">
+      <a href="#" onclick="window.logoutApp()" class="btn btn-danger btn-sm w-100 rounded-pill py-2 fw-medium d-flex justify-content-center align-items-center">
         <i class="bi bi-box-arrow-right me-1"></i> ออกจากระบบ
       </a>
     </div>
@@ -184,6 +184,21 @@
       <div class="row g-2">
         
         <div class="col-lg-5">
+
+            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                <div class="text-warning fw-medium" style="font-size: 0.85rem;"><i class="bi bi-lightning-charge-fill"></i> เมนูด่วน</div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-danger py-1 px-2" style="font-size: 0.75rem;" onclick="clearForm()" title="ล้างค่าทั้งหมด">
+                        <i class="bi bi-trash"></i> ล้าง
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary py-1 px-2" style="font-size: 0.75rem;" onclick="saveFavorite()" title="บันทึกรายการปัจจุบัน">
+                        <i class="bi bi-bookmark-plus"></i> บันทึกไว้
+                    </button>
+                    <button class="btn btn-sm btn-warning py-1 px-2 fw-bold text-dark" style="font-size: 0.75rem;" onclick="loadFavorite()" title="โหลดรายการที่บันทึกไว้">
+                        <i class="bi bi-star-fill"></i> ใช้รายการโปรด
+                    </button>
+                </div>
+            </div>
             
             <div class="form-section-card">
                 <div class="form-section-title"><i class="bi bi-phone"></i> ตั้งค่าโทรศัพท์ & แบตเตอรี่</div>
@@ -374,6 +389,84 @@
             }
         });
     }
+
+    // --------------------------------------------------------
+    // ฟังก์ชัน: การจัดการ เมนูด่วน (Clear / Save / Load)
+    // --------------------------------------------------------
+    const STORAGE_KEY = 'slipFav_TTB_IN_2';
+
+    window.clearForm = function() {
+        const now = new Date();
+        const timeStr = now.toTimeString().slice(0,5);
+        if(document.getElementById('datetime_plus_one')) document.getElementById('datetime_plus_one').value = timeStr;
+        if(document.getElementById('backgroundSelect')) document.getElementById('backgroundSelect').selectedIndex = 0;
+        
+        if(document.getElementById('battery')) {
+            document.getElementById('battery').value = 100;
+            if(typeof updateBatteryUI === 'function') updateBatteryUI();
+        }
+        const btnPower = document.getElementById('powerSavingMode');
+        if(btnPower && btnPower.classList.contains('btn-warning')) {
+            if(typeof togglePowerSavingMode === 'function') togglePowerSavingMode();
+        }
+
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        const localISO = now.toISOString().slice(0, 16);
+        if(document.getElementById('datetime')) document.getElementById('datetime').value = localISO;
+        if(document.getElementById('datetime1')) document.getElementById('datetime1').value = localISO;
+
+        if(document.getElementById('money01')) document.getElementById('money01').value = '30,365.00';
+        if(document.getElementById('senderaccount2')) document.getElementById('senderaccount2').value = 'xx3658';
+        if(document.getElementById('money02')) document.getElementById('money02').value = '30,498.68';
+        
+        if(document.getElementById('senderaccount1')) document.getElementById('senderaccount1').value = 'X3622';
+        if(document.getElementById('bank1')) document.getElementById('bank1').selectedIndex = 0;
+        if(document.getElementById('name1')) document.getElementById('name1').value = 'Wirawut Sarasroeth';
+        
+        if(document.getElementById('nametext1')) document.getElementById('nametext1').value = 'เจ๊พลอยคุ้มวัด';
+        if(document.getElementById('text1')) document.getElementById('text1').value = 'มายังอะรออยู่บ้านป้า จะมาก็รีบมา';
+
+        if(typeof window.updateDisplay === 'function') window.updateDisplay();
+    };
+
+    window.saveFavorite = function() {
+        const favData = {
+            bg: document.getElementById('backgroundSelect') ? document.getElementById('backgroundSelect').value : '',
+            money01: document.getElementById('money01') ? document.getElementById('money01').value : '',
+            sAcc2: document.getElementById('senderaccount2') ? document.getElementById('senderaccount2').value : '',
+            money02: document.getElementById('money02') ? document.getElementById('money02').value : '',
+            sAcc1: document.getElementById('senderaccount1') ? document.getElementById('senderaccount1').value : '',
+            bank1: document.getElementById('bank1') ? document.getElementById('bank1').value : '',
+            name1: document.getElementById('name1') ? document.getElementById('name1').value : '',
+            nametext1: document.getElementById('nametext1') ? document.getElementById('nametext1').value : '',
+            text1: document.getElementById('text1') ? document.getElementById('text1').value : ''
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(favData));
+        alert('⭐ บันทึกรายการนี้เป็น "รายการโปรด" เรียบร้อยแล้ว!');
+    };
+
+    window.loadFavorite = function() {
+        const savedStr = localStorage.getItem(STORAGE_KEY);
+        if (savedStr) {
+            const favData = JSON.parse(savedStr);
+            
+            if(favData.bg !== undefined && document.getElementById('backgroundSelect')) document.getElementById('backgroundSelect').value = favData.bg;
+            if(favData.money01 !== undefined && document.getElementById('money01')) document.getElementById('money01').value = favData.money01;
+            if(favData.sAcc2 !== undefined && document.getElementById('senderaccount2')) document.getElementById('senderaccount2').value = favData.sAcc2;
+            if(favData.money02 !== undefined && document.getElementById('money02')) document.getElementById('money02').value = favData.money02;
+            
+            if(favData.sAcc1 !== undefined && document.getElementById('senderaccount1')) document.getElementById('senderaccount1').value = favData.sAcc1;
+            if(favData.bank1 !== undefined && document.getElementById('bank1')) document.getElementById('bank1').value = favData.bank1;
+            if(favData.name1 !== undefined && document.getElementById('name1')) document.getElementById('name1').value = favData.name1;
+            
+            if(favData.nametext1 !== undefined && document.getElementById('nametext1')) document.getElementById('nametext1').value = favData.nametext1;
+            if(favData.text1 !== undefined && document.getElementById('text1')) document.getElementById('text1').value = favData.text1;
+            
+            if(typeof window.updateDisplay === 'function') window.updateDisplay();
+        } else {
+            alert('⚠️ คุณยังไม่ได้บันทึกรายการโปรด');
+        }
+    };
 </script>
 
 <script src="js/slipttb1.js"></script> 
